@@ -172,15 +172,25 @@ describe('sync-templates.mjs script execution', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 3. Negative guard — .github/agents/ should only have squad.agent.md
+// 3. Negative guard — the sync must not leak stray files into .github/agents/
 // ---------------------------------------------------------------------------
 
-describe('.github/agents/ contains only squad.agent.md', () => {
-  it('has no files beyond squad.agent.md from the sync', () => {
+// squad.agent.md is the only file `sync-templates.mjs` writes into .github/agents/.
+// Other files are permitted only when they are intentionally committed and NOT
+// produced by the sync — e.g. the gh-aw authoring sub-agent that `gh aw init`
+// scaffolds here so gh-aw's GH_AW_SUB_AGENT_DIR (".github/agents") picks it up.
+const NON_SYNCED_AGENTS = ['agentic-workflows.md'];
+
+describe('.github/agents/ contains only squad.agent.md from the sync', () => {
+  it('has no stray synced files beyond squad.agent.md', () => {
     const agentDir = resolve(ROOT, AGENT_MD_EXTRA_TARGET);
     expect(existsSync(agentDir), '.github/agents/ should exist').toBe(true);
     const files = readdirSync(agentDir);
-    expect(files).toEqual([AGENT_MD_FILE]);
+    expect(files, 'squad.agent.md must be present').toContain(AGENT_MD_FILE);
+    const stray = files.filter(
+      (f) => f !== AGENT_MD_FILE && !NON_SYNCED_AGENTS.includes(f),
+    );
+    expect(stray, 'sync leaked unexpected file(s) into .github/agents/').toEqual([]);
   });
 });
 

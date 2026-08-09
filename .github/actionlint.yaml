@@ -16,3 +16,14 @@ paths:
       # SC2086 (info: quoting/word-splitting) and SC2034+ (warning: unused variables),
       # as well as all actionlint-native checks.
       - "SC2129"
+
+  # The gh-aw-generated maintenance workflow declares an empty-string choice option
+  # (`- ''`) as the default "no operation" sentinel for its workflow_dispatch input.
+  # That empty value is load-bearing: every job gates on `inputs.operation == ''` to
+  # distinguish a scheduled/no-op run from an explicit operation. actionlint's
+  # syntax-check flags the empty option ("string should not be empty"), but the file is
+  # emitted verbatim by `gh aw` and hand-editing it would drift on regeneration, so the
+  # message is ignored for this generated file only.
+  "**/agentics-maintenance.yml":
+    ignore:
+      - "string should not be empty"
