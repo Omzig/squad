@@ -45,8 +45,6 @@ safe-outputs:
     title-prefix: "[squad] "
     labels: [squad]
     max: 1
-    allowed-base-branches:
-      - "squad/*"
     allowed-branches:
       - "squad/implement-*"
     allowed-files:

@@ -57,6 +57,20 @@ describe('gh-aw implement workflows', () => {
     expect(worker).toContain('Check for an existing open pull request');
   });
 
+  it('restricts worker source branch to squad/implement-* and omits base override', () => {
+    // source branch must remain tightly scoped
+    expect(worker).toContain('- "squad/implement-*"');
+    // allowed-base-branches must not appear — omitting it targets the default branch
+    expect(worker).not.toMatch(/allowed-base-branches:/);
+  });
+
+  it('requires add-comment target "*" in every workflow that comments on workflow_dispatch issues', () => {
+    // Each workflow that handles workflow_dispatch with an issue_number input must be able to
+    // comment on explicitly numbered issues; target: "*" is required for that.
+    expect(worker).toMatch(/add-comment:\r?\n\s+max: \d+\r?\n\s+target: "\*"/);
+    expect(dispatcher).toMatch(/add-comment:\r?\n\s+max: \d+\r?\n\s+target: "\*"/);
+  });
+
   it('documents one-command installation in dependency order', () => {
     const workerIndex = guide.indexOf('bradygaster/squad/workflows/squad-implement-worker.md@dev');
     const dispatcherIndex = guide.indexOf('bradygaster/squad/workflows/squad.md@dev');
